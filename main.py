@@ -6,6 +6,7 @@ import threading
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
 
+
 class Task:
     def __init__(self, name, duration):
         self.name = name
@@ -16,13 +17,14 @@ class Task:
 
     @staticmethod
     def from_dict(data):
-        return Task(data['name'], data['duration'])
+        return Task(data["name"], data["duration"])
+
 
 class TaskApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Focus Flow")
-        self.geometry("500x850")
+        self.geometry("500x600")
 
         self.tasks = []
         self.task_widgets = []
@@ -32,47 +34,149 @@ class TaskApp(ctk.CTk):
         self.current_task_index = 0
         self.selected_index = None
 
-        self.name_label = ctk.CTkLabel(self, text="Task Name:")
+        self.main_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.main_frame.pack(fill="both", expand=True, padx=0, pady=0)
+
+        self.rotation_frame = ctk.CTkFrame(self, fg_color="transparent")
+
+        self.rotation_label = ctk.CTkLabel(
+            self.rotation_frame,
+            text="",
+            font=ctk.CTkFont(size=28, weight="bold"),
+        )
+        self.rotation_label.pack(expand=True, fill="both", padx=20, pady=20)
+        self.pause_button = ctk.CTkButton(
+            self.rotation_frame,
+            text="⏸️",
+            command=self.pause_rotation,
+            width=40,
+            fg_color="#d1d5db",  # Tailwind gray-300
+            hover_color="#9ca3af",  # gray-400
+            text_color="#1f2937",  # gray-800
+        )
+        self.pause_button.pack(anchor="e", padx=20, pady=20)
+
+        self.name_label = ctk.CTkLabel(self.main_frame, text="Task Name:")
         self.name_label.pack(anchor="w", padx=10)
-        self.task_name_entry = ctk.CTkEntry(self)
+        self.task_name_entry = ctk.CTkEntry(self.main_frame)
         self.task_name_entry.pack(fill="x", padx=10, pady=5)
 
-        self.duration_label = ctk.CTkLabel(self, text="Duration (min):")
+        self.duration_label = ctk.CTkLabel(self.main_frame, text="Duration (min):")
         self.duration_label.pack(anchor="w", padx=10)
-        self.duration_entry = ctk.CTkEntry(self)
+        self.duration_entry = ctk.CTkEntry(self.main_frame)
         self.duration_entry.pack(fill="x", padx=10, pady=5)
 
-        self.save_task_button = ctk.CTkButton(self, text="Save Task", command=self.save_task)
-        self.save_task_button.pack(pady=5)
+        self.task_buttons_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.task_buttons_frame.pack(pady=5, padx=5, anchor="w")
 
-        self.new_task_button = ctk.CTkButton(self, text="Add New Task", command=self.prepare_new_task)
-        self.new_task_button.pack(pady=5)
+        self.save_task_button = ctk.CTkButton(
+            self.task_buttons_frame,
+            text="✅",
+            command=self.save_task,
+            width=40,
+            fg_color="#d1d5db",
+            hover_color="#b0b8c4",
+            text_color="#1f2937",
+        )
+        self.save_task_button.grid(row=0, column=0, padx=5)
 
-        self.move_up_button = ctk.CTkButton(self, text="Move Up", command=self.move_task_up)
-        self.move_up_button.pack(pady=5)
+        self.new_task_button = ctk.CTkButton(
+            self.task_buttons_frame,
+            text="➕",
+            command=self.prepare_new_task,
+            width=40,
+            fg_color="#d1d5db",
+            hover_color="#b0b8c4",
+            text_color="#1f2937",
+        )
+        self.new_task_button.grid(row=0, column=1, padx=5)
 
-        self.move_down_button = ctk.CTkButton(self, text="Move Down", command=self.move_task_down)
-        self.move_down_button.pack(pady=5)
+        self.move_up_button = ctk.CTkButton(
+            self.task_buttons_frame,
+            text="⬆️",
+            command=self.move_task_up,
+            width=40,
+            fg_color="#d1d5db",
+            hover_color="#b0b8c4",
+            text_color="#1f2937",
+        )
+        self.move_up_button.grid(row=0, column=2, padx=5)
 
-        self.delete_button = ctk.CTkButton(self, text="Delete Task", command=self.delete_task)
-        self.delete_button.pack(pady=5)
+        self.move_down_button = ctk.CTkButton(
+            self.task_buttons_frame,
+            text="⬇️",
+            command=self.move_task_down,
+            width=40,
+            fg_color="#d1d5db",
+            hover_color="#b0b8c4",
+            text_color="#1f2937",
+        )
+        self.move_down_button.grid(row=0, column=3, padx=5)
 
-        self.scroll_frame = ctk.CTkScrollableFrame(self, width=450, height=250)
+        self.delete_button = ctk.CTkButton(
+            self.task_buttons_frame,
+            text="🗑️",
+            command=self.delete_task,
+            width=40,
+            fg_color="#d1d5db",
+            hover_color="#b0b8c4",
+            text_color="#1f2937",
+        )
+        self.delete_button.grid(row=0, column=4, padx=5)
+
+        self.scroll_frame = ctk.CTkScrollableFrame(
+            self.main_frame, width=450, height=250
+        )
         self.scroll_frame.pack(pady=10, padx=10, fill="both", expand=True)
 
-        self.start_button = ctk.CTkButton(self, text="Start Rotation", command=self.toggle_rotation)
-        self.start_button.pack(pady=5)
+        self.rotation_buttons = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.rotation_buttons.pack(pady=10, anchor="w")
 
-        self.stop_button = ctk.CTkButton(self, text="Stop Rotation", command=self.stop_rotation)
-        self.stop_button.pack(pady=5)
+        self.start_button = ctk.CTkButton(
+            self.rotation_buttons,
+            text="▶️",
+            command=self.start_rotation,
+            width=40,
+            fg_color="#d1d5db",  # Tailwind gray-300
+            hover_color="#9ca3af",  # gray-400
+            text_color="#1f2937",  # gray-800
+        )
+        self.start_button.grid(row=0, column=0, padx=5)
 
-        self.save_button = ctk.CTkButton(self, text="Save Tasks to File", command=self.save_tasks)
-        self.save_button.pack(pady=5)
+        self.stop_button = ctk.CTkButton(
+            self.rotation_buttons,
+            text="⏹️",
+            command=self.stop_rotation,
+            width=40,
+            fg_color="#d1d5db",
+            hover_color="#9ca3af",
+            text_color="#1f2937",
+        )
+        self.stop_button.grid(row=0, column=1, padx=5)
 
-        self.load_button = ctk.CTkButton(self, text="Load Tasks from File", command=self.load_tasks)
-        self.load_button.pack(pady=5)
+        self.save_button = ctk.CTkButton(
+            self.rotation_buttons,
+            text="⮕💾",
+            command=self.save_tasks,
+            width=40,
+            fg_color="#d1d5db",
+            hover_color="#9ca3af",
+            text_color="#1f2937",
+        )
+        self.save_button.grid(row=0, column=2, padx=5)
 
-        self.status_label = ctk.CTkLabel(self, text="")
+        self.load_button = ctk.CTkButton(
+            self.rotation_buttons,
+            text="💾⮕",
+            command=self.load_tasks,
+            width=40,
+            fg_color="#d1d5db",
+            hover_color="#9ca3af",
+            text_color="#1f2937",
+        )
+        self.load_button.grid(row=0, column=3, padx=5)
+
+        self.status_label = ctk.CTkLabel(self.main_frame, text="")
         self.status_label.pack(pady=10)
 
         self.bind("<Up>", lambda event: self.move_task_up())
@@ -128,7 +232,7 @@ class TaskApp(ctk.CTk):
                 text_color=text_color,
                 corner_radius=5,
                 padx=10,
-                pady=4
+                pady=4,
             )
             label.grid(row=0, column=0, sticky="nsew")
             frame.grid_columnconfigure(0, weight=1)
@@ -147,13 +251,22 @@ class TaskApp(ctk.CTk):
 
     def move_task_up(self):
         if self.selected_index is not None and self.selected_index > 0:
-            self.tasks[self.selected_index], self.tasks[self.selected_index - 1] = self.tasks[self.selected_index - 1], self.tasks[self.selected_index]
+            self.tasks[self.selected_index], self.tasks[self.selected_index - 1] = (
+                self.tasks[self.selected_index - 1],
+                self.tasks[self.selected_index],
+            )
             self.selected_index -= 1
             self.refresh_task_list()
 
     def move_task_down(self):
-        if self.selected_index is not None and self.selected_index < len(self.tasks) - 1:
-            self.tasks[self.selected_index], self.tasks[self.selected_index + 1] = self.tasks[self.selected_index + 1], self.tasks[self.selected_index]
+        if (
+            self.selected_index is not None
+            and self.selected_index < len(self.tasks) - 1
+        ):
+            self.tasks[self.selected_index], self.tasks[self.selected_index + 1] = (
+                self.tasks[self.selected_index + 1],
+                self.tasks[self.selected_index],
+            )
             self.selected_index += 1
             self.refresh_task_list()
 
@@ -172,46 +285,39 @@ class TaskApp(ctk.CTk):
         except FileNotFoundError:
             self.status_label.configure(text="No saved tasks found")
 
-    def toggle_rotation(self):
+    def start_rotation(self):
         if not self.running:
             self.running = True
             self.paused = False
-            self.start_button.configure(text="Pause Rotation")
-            self.rotation_thread = threading.Thread(target=self.run_rotation, daemon=True)
+            self.main_frame.pack_forget()
+            self.rotation_frame.pack(fill="both", expand=True, padx=0, pady=0)
+            self.rotation_thread = threading.Thread(
+                target=self.run_rotation, daemon=True
+            )
             self.rotation_thread.start()
-        elif not self.paused:
-            self.paused = True
-            self.start_button.configure(text="Resume Rotation")
-            self.safe_ui_update("Rotation paused")
-        else:
+        elif self.paused:
             self.paused = False
-            self.start_button.configure(text="Pause Rotation")
-            self.safe_ui_update("Rotation resumed")
+            self.main_frame.pack_forget()
+            self.rotation_frame.pack(fill="both", expand=True, padx=0, pady=0)
+
+    def pause_rotation(self):
+        if not self.paused:
+            self.paused = True
+            self.rotation_frame.pack_forget()
+            self.main_frame.pack(fill="both", expand=True, padx=0, pady=0)
 
     def stop_rotation(self):
         self.running = False
         self.paused = False
         self.current_task_index = 0
-        self.start_button.configure(text="Start Rotation")
-        self.safe_ui_update("Rotation stopped")
 
     def safe_ui_update(self, text):
-        self.after(0, lambda: self.status_label.configure(text=text))
-
-    def show_task_dialog(self, task):
-        def _():
-            dialog = ctk.CTkToplevel(self)
-            dialog.geometry("400x200")
-            dialog.title("Task Info")
-            label = ctk.CTkLabel(dialog, text=f"{task.name}\nDuration: {task.duration} min", font=ctk.CTkFont(size=28, weight="bold"))
-            label.pack(expand=True, fill="both", padx=20, pady=20)
-        self.after(0, _)
+        self.after(0, lambda: self.rotation_label.configure(text=text))
 
     def run_rotation(self):
         while self.running and self.current_task_index < len(self.tasks):
             task = self.tasks[self.current_task_index]
             self.safe_ui_update(f"Working on: {task.name}")
-            self.show_task_dialog(task)
             remaining = task.duration * 60
             while remaining > 0 and self.running:
                 if self.paused:
@@ -229,8 +335,8 @@ class TaskApp(ctk.CTk):
         self.running = False
         self.paused = False
         self.current_task_index = 0
-        self.after(0, lambda: self.start_button.configure(text="Start Rotation"))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = TaskApp()
     app.mainloop()
