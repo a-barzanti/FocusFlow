@@ -15,7 +15,7 @@
 
 ## Installation
 
-You’re using [`uv`](https://github.com/astral-sh/uv), because you're clearly enlightened. Here's how to get started:
+You should use [`uv`](https://github.com/astral-sh/uv) with this project. Here's how to get started:
 
 ```bash
 uv venv
