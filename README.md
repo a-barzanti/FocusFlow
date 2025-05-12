@@ -2,7 +2,7 @@
 
 **FocusFlow** is a native Python app that helps you rotate through a list of tasks on a timer. Perfect for managing your attention span, or at least pretending to.
 
-![screenshot placeholder, because you're not fancy yet]
+![FocusFlow main screen](screenshot.png)
 
 ## Features
 
