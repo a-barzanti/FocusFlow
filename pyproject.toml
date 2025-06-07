@@ -3,7 +3,7 @@ name = "focusflow"
 version = "0.1.0"
 description = "Rotate tasks. Stay on track. Try not to spiral."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
     "customtkinter>=5.2.2",
 ]
