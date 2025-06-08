@@ -51,7 +51,7 @@ async def main(page: ft.Page):
                 expand=True,
                 padding=5,
                 border_radius=5,
-                clip_behavior=ft.ClipBehavior.AUTO,
+                clip_behavior=ft.ClipBehavior.HARD_EDGE,
             ),
             ft.Row(
                 [
