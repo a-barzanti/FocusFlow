@@ -11,3 +11,6 @@ wheels/
 
 # Local save files
 tasks.json
+
+# Mac files
+.DS_Store
