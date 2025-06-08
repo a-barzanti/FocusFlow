@@ -48,6 +48,7 @@ async def main(page: ft.Page):
                 tasks_column,
                 bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
                 expand=True,
+                scroll=ft.ScrollMode.ALWAYS,
                 padding=5,
                 border_radius=5,
                 clip_behavior=ft.ClipBehavior.HARD_EDGE,
