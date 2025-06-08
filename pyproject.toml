@@ -5,7 +5,7 @@ description = "Rotate tasks. Stay on track. Try not to spiral."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "customtkinter>=5.2.2",
+    "flet>=0.12",
 ]
 
 [dependency-groups]
