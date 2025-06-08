@@ -44,7 +44,15 @@ async def main(page: ft.Page):
                     ft.IconButton(Icons.DELETE, on_click=lambda e: delete_task()),
                 ]
             ),
-            ft.Container(tasks_column, height=250, bgcolor=ft.colors.SURFACE_VARIANT, expand=True, padding=5, border_radius=5, clip_behavior=ft.ClipBehavior.AUTO),
+            ft.Container(
+                tasks_column,
+                height=250,
+                bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                expand=True,
+                padding=5,
+                border_radius=5,
+                clip_behavior=ft.ClipBehavior.AUTO,
+            ),
             ft.Row(
                 [
                     ft.IconButton(Icons.PLAY_ARROW, on_click=lambda e: start_rotation()),
