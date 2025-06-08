@@ -28,9 +28,9 @@ async def main(page: ft.Page):
     task_name = ft.TextField(label="Task Name", expand=True)
     task_duration = ft.TextField(label="Duration (min)", width=150)
     status = ft.Text()
-    tasks_column = ft.Column(expand=True, spacing=2)
+    tasks_column = ft.ListView(expand=True, spacing=2)
 
-    timer_label = ft.Text(size=24, weight="bold")
+    timer_label = ft.Text(size=36, weight="bold")
     main_view = ft.Column(
         [
             task_name,
@@ -46,7 +46,6 @@ async def main(page: ft.Page):
             ),
             ft.Container(
                 tasks_column,
-                height=250,
                 bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
                 expand=True,
                 padding=5,
