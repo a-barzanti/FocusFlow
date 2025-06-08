@@ -198,7 +198,7 @@ async def main(page: ft.Page):
             main_view.visible = False
             rotation_view.visible = True
             page.update()
-            rotation_job = asyncio.create_task(run_rotation())
+            rotation_job = page.run_task(run_rotation)
         elif paused:
             paused = False
             main_view.visible = False
@@ -214,10 +214,13 @@ async def main(page: ft.Page):
             page.update()
 
     def stop_rotation():
-        nonlocal running, paused, current_task_index
+        nonlocal running, paused, current_task_index, rotation_job
         running = False
         paused = False
         current_task_index = 0
+        if rotation_job:
+            rotation_job.cancel()
+            rotation_job = None
 
     refresh_tasks()
 
