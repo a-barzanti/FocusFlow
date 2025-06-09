@@ -1,4 +1,5 @@
 import asyncio
+from concurrent.futures import Future
 import json
 import flet as ft
 from flet import Icons
@@ -23,18 +24,23 @@ async def main(page: ft.Page):
     running = False
     paused = False
     current_task_index = 0
-    rotation_job: asyncio.Task | None = None
+    rotation_job: Future[None] | None = None
 
     task_name = ft.TextField(label="Task Name", expand=True)
     task_duration = ft.TextField(label="Duration (min)", width=150)
-    status = ft.Text()
-    tasks_column = ft.ListView(expand=True, spacing=2)
-
-    timer_label = ft.Text(size=36, weight="bold")
-    main_view = ft.Column(
-        [
+    inputs = ft.Row(
+        controls=[
             task_name,
             task_duration,
+        ],
+    )
+    status = ft.Text()
+    tasks_column = ft.ListView(expand=True, auto_scroll=True, spacing=2)
+
+    timer_label = ft.Text(size=36, weight=ft.FontWeight.BOLD)
+    main_view = ft.Column(
+        [
+            inputs,
             ft.Row(
                 [
                     ft.IconButton(Icons.CHECK, on_click=lambda e: save_task()),
@@ -45,7 +51,7 @@ async def main(page: ft.Page):
                 ]
             ),
             ft.Container(
-                tasks_column,
+                content=ft.Column([tasks_column], expand=True),
                 bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
                 expand=True,
                 padding=5,
@@ -69,7 +75,7 @@ async def main(page: ft.Page):
         ft.IconButton(Icons.PAUSE, on_click=lambda e: pause_rotation()),
     ], expand=True, alignment=ft.MainAxisAlignment.CENTER)
 
-    page.add(ft.Stack([main_view, rotation_view]))
+    page.add(ft.Stack([main_view, rotation_view], expand=True))
     rotation_view.visible = False
 
     def refresh_tasks():
@@ -103,8 +109,10 @@ async def main(page: ft.Page):
 
     def save_task():
         nonlocal selected_index
-        name = task_name.value.strip()
+        name = (task_name.value or "").strip()
         try:
+            if task_duration.value is None:
+                raise ValueError("Duration is required")
             duration = int(task_duration.value)
         except ValueError:
             status.value = "Duration must be a number"
